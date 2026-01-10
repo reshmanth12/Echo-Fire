@@ -35,16 +35,52 @@ function setupPlayers(count) {
 }
 
 let playerColors = {};
+
 function pickColor(pIdx, color, el) {
+    // 1. Check if taken by SOMEONE ELSE
+    const existingPlayer = Object.keys(playerColors).find(key => playerColors[key] === color);
+    
+    // If taken by another player (and not me)
+    if (existingPlayer && existingPlayer != pIdx) {
+        document.getElementById('error-msg').innerText = `Color taken by Player ${parseInt(existingPlayer) + 1}!`;
+        return; 
+    }
+
+    // 2. TOGGLE / UNDO Logic
+    // If I clicked the color I already have, deselect it
+    if (playerColors[pIdx] === color) {
+        el.classList.remove('selected');
+        delete playerColors[pIdx];
+        document.getElementById('error-msg').innerText = ""; // Clear error
+        return;
+    }
+
+    // 3. Normal Selection Logic
+    // Clear error
+    document.getElementById('error-msg').innerText = "";
+
+    // Remove old selection visuals for this player
     Array.from(document.getElementById(`p${pIdx}-colors`).children).forEach(c => c.classList.remove('selected'));
+    
+    // Select the new dot
     el.classList.add('selected');
     playerColors[pIdx] = color;
 }
 
 function startGame() {
+    // Check 1: Everyone picked a color?
     if (Object.keys(playerColors).length < playerCount) {
-        document.getElementById('error-msg').innerText = "Pick colors!"; return;
+        document.getElementById('error-msg').innerText = "Pick colors for all players!";
+        return;
     }
+    
+    // Check 2: All Unique? (Redundant but safe)
+    const distinct = new Set(Object.values(playerColors));
+    if(distinct.size < playerCount) {
+        document.getElementById('error-msg').innerText = "All players must have different colors!";
+        return;
+    }
+
     players = []; board = {};
     for (let i = 0; i < playerCount; i++) {
         players.push({
@@ -239,6 +275,7 @@ function enableShooting(shooterId) {
         if (p.id === shooterId || p.eliminated) return;
         ROW_NUMBERS.forEach(num => {
             const k = `${p.id}_${num}`;
+            // Target if NOT dead AND has parts
             if (!board[k].dead && board[k].stage > 0) {
                 const cell = document.getElementById(`cell-${p.id}-${num}`);
                 cell.classList.add('valid-target');
@@ -312,6 +349,7 @@ function checkWipeout(pId) {
         if(d.dead) blockedCount++;
         if(d.stage > 0) hasAnyPart = true;
     });
+    // Eliminate if All Blocked OR No Parts Left
     if (blockedCount === 5 || !hasAnyPart) {
         eliminate(pId);
     }
@@ -354,9 +392,8 @@ function triggerVictory(winner) {
     
     screen.classList.remove('hidden');
     name.innerText = `${winner.name} WINS!`;
-    name.style.color = winner.color; // Use winner color for text
+    name.style.color = winner.color; 
 
-    // Set canvas to full screen
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
@@ -364,12 +401,10 @@ function triggerVictory(winner) {
     let particles = [];
 
     function loop() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; // Fade effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        if (Math.random() < 0.05) {
-            fireworks.push(new Firework());
-        }
+        if (Math.random() < 0.05) fireworks.push(new Firework());
 
         fireworks = fireworks.filter(f => !f.dead);
         particles = particles.filter(p => !p.dead);
