@@ -20,9 +20,13 @@ window.onload = function() {
 };
 
 function checkForSavedGame() {
-    const saved = localStorage.getItem('lms_saved_game');
-    if (saved) {
+    const stored = localStorage.getItem('lms_saved_game');
+    if (stored) {
+        const data = JSON.parse(stored);
         document.getElementById('saved-game-section').classList.remove('hidden');
+        if(data.savedAt) {
+            document.getElementById('saved-game-date').innerText = "Last Saved: " + data.savedAt;
+        }
     }
 }
 
@@ -102,7 +106,8 @@ function saveGame() {
         currentPlayerIndex,
         gameState,
         board,
-        currentRollValue
+        currentRollValue,
+        savedAt: new Date().toLocaleString()
     };
     localStorage.setItem('lms_saved_game', JSON.stringify(gameData));
     showNotification("Game Saved Successfully!", "green");
@@ -116,7 +121,7 @@ function loadSavedGame() {
     playerCount = data.playerCount;
     players = data.players;
     currentPlayerIndex = data.currentPlayerIndex;
-    gameState = 'ROLL'; // Force to roll state to avoid stuck animation states
+    gameState = 'ROLL'; 
     board = data.board;
     
     document.getElementById('setup-screen').classList.add('hidden');
@@ -129,7 +134,7 @@ function loadSavedGame() {
         ROW_NUMBERS.forEach(num => {
             const key = `${p.id}_${num}`;
             const data = board[key];
-            updateVisuals(p.id, num); // This function reads from board{}
+            updateVisuals(p.id, num); 
             if(data.dead) {
                 document.getElementById(`cell-${p.id}-${num}`).classList.add('perm-dead');
             }
@@ -149,6 +154,11 @@ function startToss() {
     if(distinct.size < playerCount) {
         document.getElementById('error-msg').innerText = "All players must have different colors!"; return;
     }
+
+    // AUTOMATICALLY DELETE OLD SAVE ON NEW GAME
+    localStorage.removeItem('lms_saved_game');
+    // Hide resume section immediately to reflect deletion
+    document.getElementById('saved-game-section').classList.add('hidden');
 
     players = [];
     for (let i = 0; i < playerCount; i++) {
@@ -198,7 +208,6 @@ function startToss() {
 }
 
 function initializeGame() {
-    // Only init board if not loading from save (usually called after toss)
     if(Object.keys(board).length === 0) {
         board = {};
         players.forEach(p => {
@@ -207,7 +216,6 @@ function initializeGame() {
             });
         });
     }
-    
     document.getElementById('game-arena').classList.remove('hidden');
     buildBoard();
     nextTurn(false); 
@@ -287,7 +295,6 @@ function goHome() {
 
 function restartGame() {
     if(confirm("Restart Game?")) {
-        // Clear board logic but keep players
         board = {};
         players.forEach(p => {
             p.eliminated = false;
@@ -299,7 +306,6 @@ function restartGame() {
         document.getElementById('victory-screen').classList.add('hidden');
         document.getElementById('game-arena').classList.remove('hidden');
         
-        // Reset Visuals
         document.querySelectorAll('.cell').forEach(c => {
             c.classList.remove('perm-dead');
             for(let i=1; i<=7; i++) c.classList.remove(`stage-${i}`);
@@ -308,7 +314,7 @@ function restartGame() {
         document.querySelectorAll('.player-header').forEach(h => h.style.opacity = '1');
         document.querySelectorAll('.corner-die').forEach(d => d.style.display = 'flex');
 
-        currentPlayerIndex = 0; // Or random again? Let's just start with P1
+        currentPlayerIndex = 0; 
         gameState = 'ROLL';
         nextTurn(false);
     }
