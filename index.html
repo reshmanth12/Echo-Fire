@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Echo Fire</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Last Man Standing</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+   <center> <h1> Echo Fire </h1></center>
     <div id="setup-screen">
-<h1> Echo Fire </h1>
         <h2>Setup Game</h2>
         <div id="step-1">
             <p>Number of Players:</p>
@@ -20,14 +19,27 @@
 
         <div id="step-2" class="hidden">
             <div id="player-config"></div>
-            <p id="error-msg" style="color: red;"></p>
-            <button onclick="startGame()" style="background: #28a745; border-color: #28a745;">START</button>
+            <p id="error-msg" style="color: red; font-weight: bold; min-height: 20px;"></p>
+            <button onclick="startToss()" style="background: #28a745; border-color: #28a745;">START GAME</button>
         </div>
+    </div>
+
+    <div id="toss-overlay" class="hidden">
+        <h2 style="color: white; text-shadow: 0 2px 4px black;">Deciding First Turn...</h2>
+        <div id="wheel-container">
+            <div id="wheel-pointer">▼</div>
+            <div id="wheel"></div>
+        </div>
+        <h1 id="toss-result"></h1>
     </div>
 
     <div id="game-arena" class="hidden">
         <div id="status-bar">Initialize...</div>
+        
         <div id="grid"></div>
+
+        <div id="game-notification"></div>
+
         <div id="dice-container"></div>
     </div>
 
@@ -35,7 +47,7 @@
         <canvas id="fireworks"></canvas>
         <div id="victory-content">
             <h1 id="winner-name">PLAYER WINS!</h1>
-            <button onclick="location.reload()" style="font-size: 20px; padding: 15px 30px; margin-top: 20px;">PLAY AGAIN</button>
+            <button onclick="location.reload()" style="font-size: 20px; padding: 15px 30px; margin-top: 20px; cursor: pointer; background: white; color: black; border: none; border-radius: 5px;">PLAY AGAIN</button>
         </div>
     </div>
 
