@@ -9,12 +9,24 @@ const COLORS = {
 let playerCount = 2;
 let players = [];
 let currentPlayerIndex = 0;
-let gameState = 'ROLL';
+let gameState = 'SETUP';
 let board = {};
 let currentRollValue = null; 
 let notificationTimeout = null;
 
-// --- GAME SETUP ---
+// --- INITIALIZATION ---
+window.onload = function() {
+    checkForSavedGame();
+};
+
+function checkForSavedGame() {
+    const saved = localStorage.getItem('lms_saved_game');
+    if (saved) {
+        document.getElementById('saved-game-section').classList.remove('hidden');
+    }
+}
+
+// --- SETUP LOGIC ---
 function setupPlayers(count) {
     playerCount = count;
     document.getElementById('step-1').classList.add('hidden');
@@ -53,6 +65,79 @@ function pickColor(pIdx, color, el) {
     Array.from(document.getElementById(`p${pIdx}-colors`).children).forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
     playerColors[pIdx] = color;
+}
+
+// --- SAVE / LOAD NAMES ---
+function saveNames() {
+    const names = [];
+    for(let i=0; i<playerCount; i++) {
+        const name = document.getElementById(`p${i}-name`).value;
+        names.push(name);
+    }
+    localStorage.setItem('lms_saved_names', JSON.stringify(names));
+    alert("Names Saved!");
+}
+
+function loadNames() {
+    const stored = localStorage.getItem('lms_saved_names');
+    if(stored) {
+        const names = JSON.parse(stored);
+        for(let i=0; i<playerCount && i<names.length; i++) {
+            document.getElementById(`p${i}-name`).value = names[i];
+        }
+    } else {
+        alert("No saved names found!");
+    }
+}
+
+// --- SAVE / LOAD GAME ---
+function saveGame() {
+    if(gameState === 'SETUP' || gameState === 'TOSS') {
+        alert("Cannot save during setup!");
+        return;
+    }
+    const gameData = {
+        playerCount,
+        players,
+        currentPlayerIndex,
+        gameState,
+        board,
+        currentRollValue
+    };
+    localStorage.setItem('lms_saved_game', JSON.stringify(gameData));
+    showNotification("Game Saved Successfully!", "green");
+}
+
+function loadSavedGame() {
+    const stored = localStorage.getItem('lms_saved_game');
+    if(!stored) return;
+    
+    const data = JSON.parse(stored);
+    playerCount = data.playerCount;
+    players = data.players;
+    currentPlayerIndex = data.currentPlayerIndex;
+    gameState = 'ROLL'; // Force to roll state to avoid stuck animation states
+    board = data.board;
+    
+    document.getElementById('setup-screen').classList.add('hidden');
+    document.getElementById('game-arena').classList.remove('hidden');
+    
+    buildBoard();
+    
+    // Restore Visuals
+    players.forEach(p => {
+        ROW_NUMBERS.forEach(num => {
+            const key = `${p.id}_${num}`;
+            const data = board[key];
+            updateVisuals(p.id, num); // This function reads from board{}
+            if(data.dead) {
+                document.getElementById(`cell-${p.id}-${num}`).classList.add('perm-dead');
+            }
+        });
+        if(p.eliminated) eliminate(p.id);
+    });
+
+    nextTurn(false);
 }
 
 // --- TOSS / SPIN LOGIC ---
@@ -113,12 +198,15 @@ function startToss() {
 }
 
 function initializeGame() {
-    board = {};
-    players.forEach(p => {
-        ROW_NUMBERS.forEach(num => {
-            board[`${p.id}_${num}`] = { stage: 0, kills: 0, dead: false };
+    // Only init board if not loading from save (usually called after toss)
+    if(Object.keys(board).length === 0) {
+        board = {};
+        players.forEach(p => {
+            ROW_NUMBERS.forEach(num => {
+                board[`${p.id}_${num}`] = { stage: 0, kills: 0, dead: false };
+            });
         });
-    });
+    }
     
     document.getElementById('game-arena').classList.remove('hidden');
     buildBoard();
@@ -188,6 +276,42 @@ function buildBoard() {
 function createDiv(cls, txt) {
     const d = document.createElement('div');
     d.className = cls; d.innerText = txt; return d;
+}
+
+/* --- CONTROLS --- */
+function goHome() {
+    if(confirm("Exit to Home? Unsaved progress will be lost.")) {
+        location.reload();
+    }
+}
+
+function restartGame() {
+    if(confirm("Restart Game?")) {
+        // Clear board logic but keep players
+        board = {};
+        players.forEach(p => {
+            p.eliminated = false;
+            p.isDead = false;
+            ROW_NUMBERS.forEach(num => {
+                board[`${p.id}_${num}`] = { stage: 0, kills: 0, dead: false };
+            });
+        });
+        document.getElementById('victory-screen').classList.add('hidden');
+        document.getElementById('game-arena').classList.remove('hidden');
+        
+        // Reset Visuals
+        document.querySelectorAll('.cell').forEach(c => {
+            c.classList.remove('perm-dead');
+            for(let i=1; i<=7; i++) c.classList.remove(`stage-${i}`);
+        });
+        document.querySelectorAll('.kill-dot').forEach(d => d.classList.remove('dead'));
+        document.querySelectorAll('.player-header').forEach(h => h.style.opacity = '1');
+        document.querySelectorAll('.corner-die').forEach(d => d.style.display = 'flex');
+
+        currentPlayerIndex = 0; // Or random again? Let's just start with P1
+        gameState = 'ROLL';
+        nextTurn(false);
+    }
 }
 
 /* --- GAME LOOP --- */
@@ -310,7 +434,6 @@ function shoot(sId, vId, vNum) {
     }
     updateVisuals(vId, vNum);
     
-    // NOTIFICATION
     showNotification(`${players[sId].name} HIT ${players[vId].name}!`, players[sId].color);
 
     // 2. SELF-KILL CHECK
