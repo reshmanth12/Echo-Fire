@@ -5,14 +5,13 @@ body {
     color: #333;
     margin: 0;
     padding: 0;
-    /* Allow scrolling/zooming if content is larger than screen */
-    min-height: 100vh;
+    height: 100vh;
     width: 100vw;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* UPDATED: Allowed default touch actions for zooming */
     touch-action: manipulation; 
 }
 
@@ -24,7 +23,7 @@ body {
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     background: white;
-    padding: 30px;
+    padding: 25px;
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     z-index: 100;
@@ -35,14 +34,14 @@ body {
 
 button {
     background: #333; color: white; border: none;
-    padding: 10px 20px; border-radius: 4px; cursor: pointer;
+    padding: 10px 15px; border-radius: 4px; cursor: pointer;
     font-size: 16px; margin: 5px; border: 1px solid #000;
 }
-button:hover { background: #555; }
+button:hover { opacity: 0.9; }
 
 .player-input-row {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 8px; background: #eee; padding: 5px;
+    margin-bottom: 8px; background: #eee; padding: 5px; border-radius: 4px;
 }
 .color-dot {
     width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 2px solid #ccc;
@@ -51,7 +50,7 @@ button:hover { background: #555; }
 .color-dot:hover { transform: scale(1.1); }
 .color-dot.selected { border-color: black; transform: scale(1.2); box-shadow: 0 0 5px rgba(0,0,0,0.5); }
 
-/* --- TOSS OVERLAY (WHEEL) --- */
+/* --- TOSS OVERLAY --- */
 #toss-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.9); z-index: 200;
@@ -68,17 +67,52 @@ button:hover { background: #555; }
     display: flex; flex-direction: column; justify-content: center; align-items: center;
 }
 
+/* --- TOP CONTROL BAR --- */
+#top-bar {
+    position: absolute;
+    top: 10px;
+    width: 90%;
+    max-width: 800px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 60;
+    pointer-events: auto; /* Ensure buttons are clickable */
+}
+
+.left-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.left-controls button {
+    background: #fff;
+    color: #333;
+    border: 2px solid #333;
+    font-size: 18px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex; justify-content: center; align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
 #status-bar {
-    position: absolute; top: 2%;
-    background: #333; color: gold;
-    padding: 8px 20px; border-radius: 20px; font-weight: bold;
-    z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    background: #333;
+    color: gold;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    min-width: 150px;
+    text-align: center;
+    border: 2px solid gold;
 }
 
 /* --- GAME NOTIFICATION --- */
 #game-notification {
     position: absolute;
-    bottom: 15%;
+    bottom: 12%; /* Adjusted to not overlap dice */
     left: 50%;
     transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.95);
@@ -104,6 +138,7 @@ button:hover { background: #555; }
     gap: 0;
     border: 3px solid #222; background: #fff;
     box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    margin-top: 40px; /* Space for top bar */
 }
 
 .cell, .header-cell {
@@ -159,10 +194,14 @@ button:hover { background: #555; }
 .corner-die.my-turn { animation: bounce 0.6s infinite alternate; }
 .die-label { font-size: 12px; margin-bottom: 2px; color: #555; }
 
-.pos-0 { top: 20px; left: 20px; }       
-.pos-1 { bottom: 20px; left: 20px; }    
-.pos-2 { top: 20px; right: 20px; }      
-.pos-3 { bottom: 20px; right: 20px; }   
+/* --- DICE POSITIONS (Updated) --- */
+/* P1 */ .pos-0 { top: 70px; left: 20px; }       /* Top-Left (Below Top Bar) */
+/* P2 */ .pos-1 { bottom: 20px; left: 20px; }    /* Bottom-Left */
+/* P3 */ .pos-2 { bottom: 20px; right: 20px; }   /* Bottom-Right (Requested) */
+/* P4 */ .pos-3 { top: 70px; right: 20px; }      /* Top-Right (Requested) (Below Top Bar) */
+
+/* 2-PLAYER OVERRIDE */
+/* P2 moves to Bottom-Right in 2-player mode */
 .two-players .pos-1 { top: auto; bottom: 20px; left: auto; right: 20px; }
 
 @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-5px); } }
@@ -192,8 +231,7 @@ button:hover { background: #555; }
    MOBILE VIEW SCALING
    ========================================= */
 @media only screen and (max-width: 768px) {
-    /* Allow content to flow naturally, user can pinch-zoom */
     #grid {
-        transform: scale(0.7); /* Optional: Start slightly smaller to fit width */
+        transform: scale(0.7); 
     }
 }
