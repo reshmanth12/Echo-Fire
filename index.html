@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Last Man Standing</title>
+    <title>Echo-Fire</title>
     <link rel="stylesheet" href="style.css">
-    </head>
+</head>
 <body>
-
+    <center>Echo Fire</center>
     <div id="setup-screen">
-        <h2>Setup Game</h2>
+        <h2>Setup New Game</h2>
         
         <div id="saved-game-section" class="hidden">
-            <button onclick="loadSavedGame()" style="background: #ff9800; border-color: #ff9800; width: 100%;">RESUME SAVED GAME</button>
-            <hr style="margin: 15px 0; border: 0.5px solid #444;">
+            <button onclick="loadSavedGame()" class="resume-btn">Resume Saved Game</button>
+            <div id="saved-game-date"></div>
+            <div class="divider"><span>OR START NEW</span></div>
         </div>
 
         <div id="step-1">
@@ -27,13 +28,13 @@
             <div id="player-config"></div>
             
             <div style="display: flex; gap: 10px; justify-content: center; margin: 10px 0;">
-                <button onclick="saveNames()" style="background: #17a2b8; font-size: 14px; padding: 8px;">Save Names</button>
-                <button onclick="loadNames()" style="background: #17a2b8; font-size: 14px; padding: 8px;">Load Names</button>
+                <button onclick="saveNames()" style="background: #17a2b8; font-size: 14px; padding: 5px 10px;">Save Names</button>
+                <button onclick="loadNames()" style="background: #17a2b8; font-size: 14px; padding: 5px 10px;">Load Names</button>
             </div>
 
             <p id="error-msg" style="color: red; font-weight: bold; min-height: 20px;"></p>
-            <button onclick="startToss()" style="background: #28a745; border-color: #28a745; width: 100%;">START GAME</button>
-            <button onclick="goHome()" style="background: #666; margin-top: 5px;">BACK</button>
+            <button onclick="startToss()" style="background: #28a745; border-color: #28a745; width: 100%; padding: 12px; font-size: 18px;">START GAME</button>
+            <button onclick="goHome()" style="background: #666; margin-top: 5px; font-size: 12px;">BACK</button>
         </div>
     </div>
 
