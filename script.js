@@ -13,6 +13,7 @@ let gameState = 'ROLL';
 let board = {};
 let currentRollValue = null; 
 let notificationTimeout = null;
+let currentZoom = 1;
 
 // --- GAME SETUP ---
 function setupPlayers(count) {
@@ -119,9 +120,41 @@ function initializeGame() {
             board[`${p.id}_${num}`] = { stage: 0, kills: 0, dead: false };
         });
     });
+    
     document.getElementById('game-arena').classList.remove('hidden');
+    // Show Zoom controls
+    document.getElementById('zoom-controls').classList.remove('hidden');
+    
+    // Auto-Set Zoom for Mobile
+    resetZoom();
+
     buildBoard();
     nextTurn(false); 
+}
+
+// --- ZOOM LOGIC ---
+function adjustZoom(delta) {
+    currentZoom += delta;
+    if(currentZoom < 0.3) currentZoom = 0.3;
+    if(currentZoom > 2.0) currentZoom = 2.0;
+    applyZoom();
+}
+
+function resetZoom() {
+    // Check screen width: if mobile (<768px), set smaller zoom
+    if (window.innerWidth <= 768) {
+        currentZoom = 0.6;
+    } else {
+        currentZoom = 1;
+    }
+    applyZoom();
+}
+
+function applyZoom() {
+    const arena = document.getElementById('game-arena');
+    if(arena) {
+        arena.style.transform = `scale(${currentZoom})`;
+    }
 }
 
 function buildBoard() {
