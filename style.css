@@ -64,8 +64,9 @@ button:hover { background: #555; }
 #game-arena {
     position: relative; width: 100%; height: 100%;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
-    /* Transition for smooth scaling */
-    transition: transform 0.3s ease;
+    /* Transformation is now handled by JS for Zoom */
+    transition: transform 0.2s ease-out; 
+    transform-origin: center center;
 }
 
 #status-bar {
@@ -74,6 +75,30 @@ button:hover { background: #555; }
     padding: 8px 20px; border-radius: 20px; font-weight: bold;
     z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
+
+/* --- ZOOM CONTROLS --- */
+#zoom-controls {
+    position: fixed;
+    top: 100px; /* Safe distance below top-right dice */
+    right: 10px;
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+#zoom-controls button {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.8);
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+    border: 2px solid #333;
+    margin: 0;
+    padding: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+#zoom-controls button:active { transform: scale(0.9); }
 
 /* --- GAME NOTIFICATION --- */
 #game-notification {
@@ -187,16 +212,3 @@ button:hover { background: #555; }
 #victory-content { position: relative; z-index: 1000; text-align: center; }
 #winner-name { font-size: 80px; color: #FFD700; text-shadow: 0 0 20px #FFD700, 0 0 40px red; animation: popIn 1s ease-out infinite alternate; margin: 0; }
 @keyframes popIn { 0% { transform: scale(1); } 100% { transform: scale(1.1); text-shadow: 0 0 40px #FFD700, 0 0 80px orange; } }
-
-/* =========================================
-   MOBILE VIEW SCALING
-   ========================================= */
-@media only screen and (max-width: 768px) {
-    #game-arena {
-        /* Scale down the entire game arena for mobile */
-        transform: scale(0.7); 
-        transform-origin: center center;
-        width: 100%;
-        height: 100%;
-    }
-}
