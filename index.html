@@ -5,11 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Last Man Standing</title>
     <link rel="stylesheet" href="style.css">
-</head>
+    </head>
 <body>
 
     <div id="setup-screen">
         <h2>Setup Game</h2>
+        
+        <div id="saved-game-section" class="hidden">
+            <button onclick="loadSavedGame()" style="background: #ff9800; border-color: #ff9800; width: 100%;">RESUME SAVED GAME</button>
+            <hr style="margin: 15px 0; border: 0.5px solid #444;">
+        </div>
+
         <div id="step-1">
             <p>Number of Players:</p>
             <button onclick="setupPlayers(2)">2</button>
@@ -19,8 +25,15 @@
 
         <div id="step-2" class="hidden">
             <div id="player-config"></div>
+            
+            <div style="display: flex; gap: 10px; justify-content: center; margin: 10px 0;">
+                <button onclick="saveNames()" style="background: #17a2b8; font-size: 14px; padding: 8px;">Save Names</button>
+                <button onclick="loadNames()" style="background: #17a2b8; font-size: 14px; padding: 8px;">Load Names</button>
+            </div>
+
             <p id="error-msg" style="color: red; font-weight: bold; min-height: 20px;"></p>
-            <button onclick="startToss()" style="background: #28a745; border-color: #28a745;">START GAME</button>
+            <button onclick="startToss()" style="background: #28a745; border-color: #28a745; width: 100%;">START GAME</button>
+            <button onclick="goHome()" style="background: #666; margin-top: 5px;">BACK</button>
         </div>
     </div>
 
@@ -34,7 +47,15 @@
     </div>
 
     <div id="game-arena" class="hidden">
-        <div id="status-bar">Initialize...</div>
+        
+        <div id="top-bar">
+            <div class="left-controls">
+                <button onclick="goHome()" title="Home">🏠</button>
+                <button onclick="saveGame()" title="Save Game">💾</button>
+                <button onclick="restartGame()" title="Restart">🔄</button>
+            </div>
+            <div id="status-bar">Initialize...</div>
+        </div>
         
         <div id="grid"></div>
 
@@ -47,7 +68,9 @@
         <canvas id="fireworks"></canvas>
         <div id="victory-content">
             <h1 id="winner-name">PLAYER WINS!</h1>
-            <button onclick="location.reload()" style="font-size: 20px; padding: 15px 30px; margin-top: 20px; cursor: pointer; background: white; color: black; border: none; border-radius: 5px;">PLAY AGAIN</button>
+            <button onclick="restartGame()" style="font-size: 20px; padding: 15px 30px; margin-top: 20px; cursor: pointer; background: white; color: black; border: none; border-radius: 5px;">PLAY AGAIN</button>
+            <br>
+            <button onclick="goHome()" style="margin-top: 10px; background: #333; color: white; padding: 10px 20px; border: 1px solid white;">HOME</button>
         </div>
     </div>
 
