@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div id="setup-screen">
         <h2>Setup Game</h2>
         <div id="step-1">
@@ -42,6 +43,12 @@
         <div id="dice-container"></div>
     </div>
 
+    <div id="zoom-controls" class="hidden">
+        <button onclick="adjustZoom(0.1)" title="Zoom In">+</button>
+        <button onclick="resetZoom()" title="Reset Zoom">R</button>
+        <button onclick="adjustZoom(-0.1)" title="Zoom Out">-</button>
+    </div>
+
     <div id="victory-screen" class="hidden">
         <canvas id="fireworks"></canvas>
         <div id="victory-content">
@@ -53,4 +60,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
