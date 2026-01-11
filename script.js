@@ -12,6 +12,7 @@ let currentPlayerIndex = 0;
 let gameState = 'ROLL';
 let board = {};
 let currentRollValue = null; 
+let notificationTimeout = null;
 
 // --- GAME SETUP ---
 function setupPlayers(count) {
@@ -37,51 +38,34 @@ function setupPlayers(count) {
 let playerColors = {};
 
 function pickColor(pIdx, color, el) {
-    // 1. Check if taken by SOMEONE ELSE
     const existingPlayer = Object.keys(playerColors).find(key => playerColors[key] === color);
-    
-    // If taken by another player (and not me)
     if (existingPlayer && existingPlayer != pIdx) {
         document.getElementById('error-msg').innerText = `Color taken by Player ${parseInt(existingPlayer) + 1}!`;
         return; 
     }
-
-    // 2. TOGGLE / UNDO Logic
-    // If I clicked the color I already have, deselect it
     if (playerColors[pIdx] === color) {
         el.classList.remove('selected');
         delete playerColors[pIdx];
-        document.getElementById('error-msg').innerText = ""; // Clear error
+        document.getElementById('error-msg').innerText = ""; 
         return;
     }
-
-    // 3. Normal Selection Logic
-    // Clear error
     document.getElementById('error-msg').innerText = "";
-
-    // Remove old selection visuals for this player
     Array.from(document.getElementById(`p${pIdx}-colors`).children).forEach(c => c.classList.remove('selected'));
-    
-    // Select the new dot
     el.classList.add('selected');
     playerColors[pIdx] = color;
 }
 
-function startGame() {
-    // Check 1: Everyone picked a color?
+// --- TOSS / SPIN LOGIC ---
+function startToss() {
     if (Object.keys(playerColors).length < playerCount) {
-        document.getElementById('error-msg').innerText = "Pick colors for all players!";
-        return;
+        document.getElementById('error-msg').innerText = "Pick colors for all players!"; return;
     }
-    
-    // Check 2: All Unique? (Redundant but safe)
     const distinct = new Set(Object.values(playerColors));
     if(distinct.size < playerCount) {
-        document.getElementById('error-msg').innerText = "All players must have different colors!";
-        return;
+        document.getElementById('error-msg').innerText = "All players must have different colors!"; return;
     }
 
-    players = []; board = {};
+    players = [];
     for (let i = 0; i < playerCount; i++) {
         players.push({
             id: i,
@@ -90,16 +74,52 @@ function startGame() {
             eliminated: false
         });
     }
+
+    document.getElementById('setup-screen').classList.add('hidden');
+    const tossOverlay = document.getElementById('toss-overlay');
+    tossOverlay.classList.remove('hidden');
+
+    let gradient = "conic-gradient(";
+    let slice = 100 / playerCount; 
+    players.forEach((p, idx) => {
+        let start = idx * slice;
+        let end = (idx + 1) * slice;
+        gradient += `${p.color} ${start}% ${end}%${idx < playerCount - 1 ? ', ' : ''}`;
+    });
+    gradient += ")";
     
+    const wheel = document.getElementById('wheel');
+    wheel.style.background = gradient;
+
+    const winnerIdx = Math.floor(Math.random() * playerCount);
+    const sliceDeg = 360 / playerCount;
+    const centerAngle = (winnerIdx * sliceDeg) + (sliceDeg / 2);
+    const spins = 360 * 8; 
+    const targetRotation = spins - centerAngle;
+
+    setTimeout(() => { wheel.style.transform = `rotate(${targetRotation}deg)`; }, 100);
+
+    setTimeout(() => {
+        const winner = players[winnerIdx];
+        const resText = document.getElementById('toss-result');
+        resText.innerText = `${winner.name} goes first!`;
+        resText.style.color = winner.color;
+        currentPlayerIndex = winnerIdx;
+        setTimeout(() => {
+            tossOverlay.classList.add('hidden');
+            initializeGame();
+        }, 2000);
+    }, 3100); 
+}
+
+function initializeGame() {
+    board = {};
     players.forEach(p => {
         ROW_NUMBERS.forEach(num => {
             board[`${p.id}_${num}`] = { stage: 0, kills: 0, dead: false };
         });
     });
-
-    document.getElementById('setup-screen').classList.add('hidden');
     document.getElementById('game-arena').classList.remove('hidden');
-    
     buildBoard();
     nextTurn(false); 
 }
@@ -107,10 +127,8 @@ function startGame() {
 function buildBoard() {
     const grid = document.getElementById('grid');
     const diceCont = document.getElementById('dice-container');
-    
     grid.style.setProperty('--col-count', playerCount);
-    grid.innerHTML = '';
-    diceCont.innerHTML = '';
+    grid.innerHTML = ''; diceCont.innerHTML = '';
     
     if(playerCount === 2) diceCont.className = 'two-players';
     else diceCont.className = '';
@@ -153,7 +171,6 @@ function buildBoard() {
             `;
             grid.appendChild(cell);
         });
-
         grid.appendChild(createDiv('cell side-num', num));
     });
 
@@ -176,7 +193,6 @@ function createDiv(cls, txt) {
 
 function nextTurn(advance = true) {
     if(checkWin()) return;
-    
     if(advance) {
         let loops = 0;
         do {
@@ -189,18 +205,10 @@ function nextTurn(advance = true) {
     gameState = 'ROLL';
     setStatus(`${p.name}'s Turn`);
     
-    // 1. Reset visual highlights for all
-    document.querySelectorAll('.header-cell').forEach(h => {
-        h.style.backgroundColor = '#ddd'; h.style.color = '#333';
-    });
-    document.querySelectorAll('.cell').forEach(c => {
-        c.style.borderColor = '#444'; c.style.backgroundColor = 'transparent';
-    });
-    document.querySelectorAll('.corner-die').forEach(d => {
-        d.classList.remove('my-turn'); d.style.borderColor = '#333'; d.style.boxShadow = '4px 4px 0px rgba(0,0,0,0.2)';
-    });
+    document.querySelectorAll('.header-cell').forEach(h => { h.style.backgroundColor = '#ddd'; h.style.color = '#333'; });
+    document.querySelectorAll('.cell').forEach(c => { c.style.borderColor = '#444'; c.style.backgroundColor = 'transparent'; });
+    document.querySelectorAll('.corner-die').forEach(d => { d.classList.remove('my-turn'); d.style.borderColor = '#333'; d.style.boxShadow = '4px 4px 0px rgba(0,0,0,0.2)'; });
 
-    // 2. Highlight CURRENT player
     const activeDie = document.getElementById(`die-${p.id}`);
     activeDie.classList.add('my-turn');
     activeDie.style.borderColor = p.color;
@@ -270,12 +278,10 @@ function handleRollResult(pId, num) {
 function enableShooting(shooterId) {
     gameState = 'SHOOT';
     let targets = 0;
-    
     players.forEach(p => {
         if (p.id === shooterId || p.eliminated) return;
         ROW_NUMBERS.forEach(num => {
             const k = `${p.id}_${num}`;
-            // Target if NOT dead AND has parts
             if (!board[k].dead && board[k].stage > 0) {
                 const cell = document.getElementById(`cell-${p.id}-${num}`);
                 cell.classList.add('valid-target');
@@ -284,7 +290,6 @@ function enableShooting(shooterId) {
             }
         });
     });
-
     if(targets === 0) {
         setStatus("No Targets!");
         setTimeout(() => nextTurn(), 1000);
@@ -293,9 +298,7 @@ function enableShooting(shooterId) {
 
 function shoot(sId, vId, vNum) {
     if(gameState !== 'SHOOT') return;
-    document.querySelectorAll('.valid-target').forEach(e => {
-        e.classList.remove('valid-target'); e.onclick = null;
-    });
+    document.querySelectorAll('.valid-target').forEach(e => { e.classList.remove('valid-target'); e.onclick = null; });
 
     // 1. DAMAGE
     const vData = board[`${vId}_${vNum}`];
@@ -306,6 +309,9 @@ function shoot(sId, vId, vNum) {
     }
     updateVisuals(vId, vNum);
     
+    // NOTIFICATION
+    showNotification(`${players[sId].name} HIT ${players[vId].name}!`, players[sId].color);
+
     // 2. SELF-KILL CHECK
     const shooterKey = `${sId}_${currentRollValue}`;
     const shooterData = board[shooterKey];
@@ -329,16 +335,27 @@ function shoot(sId, vId, vNum) {
     }
 }
 
+function showNotification(msg, color) {
+    const el = document.getElementById('game-notification');
+    if(notificationTimeout) clearTimeout(notificationTimeout);
+    
+    el.innerText = msg;
+    el.style.color = color || '#333';
+    el.style.borderColor = color || '#333';
+    el.classList.add('show');
+    
+    notificationTimeout = setTimeout(() => {
+        el.classList.remove('show');
+    }, 3000);
+}
+
 function updateVisuals(pId, num) {
     const data = board[`${pId}_${num}`];
     const cell = document.getElementById(`cell-${pId}-${num}`);
     for(let i=1; i<=7; i++) cell.classList.remove(`stage-${i}`);
     if(data.stage > 0) cell.classList.add(`stage-${data.stage}`);
-
     const dots = document.getElementById(`k-${pId}-${num}`).children;
-    for(let i=0; i<6; i++) {
-        if(i < data.kills) dots[i].classList.add('dead');
-    }
+    for(let i=0; i<6; i++) { if(i < data.kills) dots[i].classList.add('dead'); }
 }
 
 function checkWipeout(pId) {
@@ -349,7 +366,6 @@ function checkWipeout(pId) {
         if(d.dead) blockedCount++;
         if(d.stage > 0) hasAnyPart = true;
     });
-    // Eliminate if All Blocked OR No Parts Left
     if (blockedCount === 5 || !hasAnyPart) {
         eliminate(pId);
     }
@@ -389,32 +405,23 @@ function triggerVictory(winner) {
     const name = document.getElementById('winner-name');
     const canvas = document.getElementById('fireworks');
     const ctx = canvas.getContext('2d');
-    
     screen.classList.remove('hidden');
     name.innerText = `${winner.name} WINS!`;
     name.style.color = winner.color; 
-
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
     let fireworks = [];
     let particles = [];
-
     function loop() {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
         if (Math.random() < 0.05) fireworks.push(new Firework());
-
         fireworks = fireworks.filter(f => !f.dead);
         particles = particles.filter(p => !p.dead);
-
         fireworks.forEach(f => { f.update(); f.draw(); });
         particles.forEach(p => { p.update(); p.draw(); });
-
         requestAnimationFrame(loop);
     }
-
     class Firework {
         constructor() {
             this.x = Math.random() * canvas.width;
@@ -432,13 +439,10 @@ function triggerVictory(winner) {
             }
         }
         draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.fill();
+            ctx.beginPath(); ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = this.color; ctx.fill();
         }
     }
-
     class Particle {
         constructor(x, y, color) {
             this.x = x; this.y = y; this.color = color;
@@ -456,15 +460,10 @@ function triggerVictory(winner) {
             if (this.alpha <= 0) this.dead = true;
         }
         draw() {
-            ctx.save();
-            ctx.globalAlpha = this.alpha;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-            ctx.restore();
+            ctx.save(); ctx.globalAlpha = this.alpha;
+            ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = this.color; ctx.fill(); ctx.restore();
         }
     }
-
     loop();
 }
