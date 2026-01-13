@@ -1,0 +1,156 @@
+/* --- LAYOUT & SCALING --- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: auto; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.8s ease; 
+}
+
+.hidden { display: none !important; }
+
+/* --- REMOTE CONTROL FOCUS --- */
+.keyboard-focus {
+    outline: 4px solid #FFD700 !important; 
+    box-shadow: 0 0 15px #FFD700 !important;
+    transform: scale(1.05);
+    z-index: 1000;
+    transition: transform 0.1s;
+}
+
+/* --- GAME TARGETS (AIMING) --- */
+@keyframes blinkRed {
+    0% { background-color: rgba(255, 0, 0, 0.1); border-color: red; }
+    50% { background-color: rgba(255, 0, 0, 0.3); border-color: darkred; }
+    100% { background-color: rgba(255, 0, 0, 0.1); border-color: red; }
+}
+
+/* Base style for potential targets */
+.valid-target { 
+    animation: blinkRed 1s infinite; 
+    cursor: crosshair; 
+    border: 3px dashed red !important; 
+    z-index: 100;
+}
+
+/* LOCKED AIM STATE (Green) */
+.valid-target.aim-locked {
+    animation: none !important;
+    outline: 5px solid #00FF00 !important; 
+    box-shadow: 0 0 25px #00FF00 !important;
+    background-color: rgba(0, 255, 0, 0.3) !important;
+    border-color: #00FF00 !important;
+    transform: scale(1.05);
+    z-index: 101;
+}
+
+/* --- PAUSE MENU --- */
+#pause-menu {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 2000; 
+    display: flex; justify-content: center; align-items: center;
+}
+
+.pause-box {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    border: 3px solid #333;
+}
+
+.pause-btn {
+    display: block; width: 100%; margin: 10px 0; padding: 12px;
+    font-size: 18px; background: #333; color: white;
+    border: 2px solid black; border-radius: 6px; cursor: pointer;
+}
+
+/* --- COLOR DOTS --- */
+.color-dot {
+    width: 35px; height: 35px; border-radius: 50%; cursor: pointer; 
+    border: 3px solid #ddd; transition: all 0.1s; box-sizing: border-box; opacity: 0.6; 
+}
+.color-dot.selected {
+    border: 5px solid #000 !important; opacity: 1 !important; transform: scale(1.15); box-shadow: 0 0 8px rgba(0,0,0,0.6);
+}
+.color-dot.keyboard-focus, .color-dot:hover {
+    opacity: 1; transform: scale(1.2); outline: 4px solid #FFD700; outline-offset: 2px;
+}
+
+/* Input Fields */
+input { border: 1px solid #ccc; padding: 5px; border-radius: 4px; }
+input.keyboard-focus { background-color: #fff3cd; border-color: #FFD700; }
+input:focus { background-color: #fff; outline: 4px solid #007bff !important; border-color: #007bff; }
+
+/* Setup & Grid Basics */
+#setup-screen { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 100; text-align: center; border: 2px solid #333; width: 90%; max-width: 400px; }
+button { background: #333; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 16px; margin: 5px; border: 1px solid #000; }
+.resume-btn { background: #ff9800; border-color: #e68900; font-size: 14px; padding: 8px 15px; width: auto; margin-bottom: 2px; }
+.divider { display: flex; align-items: center; text-align: center; color: #888; font-size: 12px; margin: 10px 0; }
+.divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #ddd; }
+.divider span { padding: 0 10px; }
+.player-input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #eee; padding: 5px; border-radius: 4px; }
+#toss-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 200; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+#wheel-container { position: relative; width: 250px; height: 250px; margin: 20px; }
+#wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid white; transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1); }
+#wheel-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 40px; color: white; z-index: 201; text-shadow: 0 2px 2px black; }
+#toss-result { color: white; font-size: 32px; height: 40px; text-shadow: 0 0 10px gold; }
+#game-arena { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+#top-bar { position: absolute; top: 10px; width: 90%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; z-index: 60; }
+.left-controls { display: flex; gap: 5px; }
+.left-controls button { background: #fff; color: #333; border: 2px solid #333; font-size: 18px; width: 40px; height: 40px; border-radius: 50%; padding: 0; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+#status-bar { background: #333; color: gold; padding: 8px 20px; border-radius: 20px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); min-width: 150px; text-align: center; border: 2px solid gold; }
+#game-notification { position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.95); padding: 10px 25px; border-radius: 50px; font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.5s ease; z-index: 60; pointer-events: none; text-align: center; white-space: nowrap; border: 2px solid #333; }
+#game-notification.show { opacity: 1; }
+#grid { display: grid; grid-template-columns: 50px repeat(var(--col-count, 2), 110px) 50px; gap: 0; border: 3px solid #222; background: #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin-top: 40px; }
+.cell, .header-cell { border: 1px solid #444; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; position: relative; transition: all 0.3s ease; }
+.header-cell { height: 40px; justify-content: center; background: #ddd; font-weight: bold; }
+.cell { height: 14vh; } 
+.side-num { justify-content: center; font-size: 1.5em; font-weight: bold; background: #e8e8e8; }
+.highlight-row-label { background: gold !important; color: black; }
+.drawing-area { position: relative; width: 80px; height: 100%; margin-top: 5px; }
+.part { position: absolute; background: black; opacity: 0; transition: opacity 0.2s; }
+.part-head { width: 18px; height: 18px; border-radius: 50%; border: 2px solid black; background: transparent; top: 15%; left: 30px; z-index: 2; }
+.part-body { width: 3px; height: 35%; top: 30%; left: 39px; z-index: 1; }
+.part-arms { width: 40px; height: 3px; top: 40%; left: 20px; z-index: 2; }
+.part-legs { width: 40px; height: 30%; top: 62%; left: 20px; background: transparent; }
+.part-legs::before, .part-legs::after { content: ''; position: absolute; width: 3px; height: 100%; background: black; top: 0; }
+.part-legs::before { left: 18px; transform: rotate(20deg); transform-origin: top; }
+.part-legs::after { right: 18px; transform: rotate(-20deg); transform-origin: top; }
+.part-gun { width: 16px; height: 10px; background: #555; top: 38%; left: 60px; }
+.part-gun-handle { width: 4px; height: 8px; background: #555; top: 43%; left: 60px; }
+.cell.stage-1 .part-head, .cell.stage-2 .part-head, .cell.stage-3 .part-head, .cell.stage-4 .part-head, .cell.stage-5 .part-head, .cell.stage-6 .part-head, .cell.stage-7 .part-head { opacity: 1; }
+.cell.stage-2 .part-body, .cell.stage-3 .part-body, .cell.stage-4 .part-body, .cell.stage-5 .part-body, .cell.stage-6 .part-body, .cell.stage-7 .part-body { opacity: 1; }
+.cell.stage-3 .part-arms, .cell.stage-3 .part-legs, .cell.stage-4 .part-arms, .cell.stage-4 .part-legs, .cell.stage-5 .part-arms, .cell.stage-5 .part-legs, .cell.stage-6 .part-arms, .cell.stage-6 .part-legs, .cell.stage-7 .part-arms, .cell.stage-7 .part-legs { opacity: 1; }
+.cell.stage-4 .part-gun, .cell.stage-4 .part-gun-handle, .cell.stage-5 .part-gun, .cell.stage-5 .part-gun-handle, .cell.stage-6 .part-gun, .cell.stage-6 .part-gun-handle, .cell.stage-7 .part-gun, .cell.stage-7 .part-gun-handle { opacity: 1; }
+.bullet-indicators { position: absolute; bottom: 5px; right: 2px; display: flex; flex-direction: column; gap: 3px; }
+.bullet-dot { width: 10px; height: 10px; background: transparent; border: 1px solid #aaa; border-radius: 50%; opacity: 0.1; }
+.cell.stage-5 .bullet-1, .cell.stage-6 .bullet-1, .cell.stage-7 .bullet-1, .cell.stage-6 .bullet-2, .cell.stage-7 .bullet-2, .cell.stage-7 .bullet-3 { opacity: 1; background: white; border: 1px solid #333; box-shadow: 0 0 3px rgba(0,0,0,0.5); }
+.kill-tracker { display: flex; gap: 4px; margin-top: 5px; }
+.kill-dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid #555; position: relative; }
+.kill-dot.dead::after { content: '/'; position: absolute; top: -4px; left: 1px; color: red; font-size: 12px; font-weight: bold; }
+.corner-die { position: absolute; width: 70px; height: 70px; background: white; border: 3px solid #333; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 22px; font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0px rgba(0,0,0,0.2); transition: all 0.2s ease; z-index: 50; }
+.corner-die:active { transform: scale(0.95); }
+.corner-die.my-turn { animation: bounce 0.6s infinite alternate; }
+.die-label { font-size: 12px; margin-bottom: 2px; color: #555; }
+.pos-0 { top: 70px; left: 20px; } .pos-1 { bottom: 20px; left: 20px; } .pos-2 { bottom: 20px; right: 20px; } .pos-3 { top: 70px; right: 20px; }
+.two-players .pos-1 { top: auto; bottom: 20px; left: auto; right: 20px; }
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+.perm-dead { background: #555; } .perm-dead .part { opacity: 0.2; }
+#victory-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); z-index: 999; display: flex; justify-content: center; align-items: center; }
+#fireworks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+#victory-content { position: relative; z-index: 1000; text-align: center; }
+#winner-name { font-size: 80px; color: #FFD700; text-shadow: 0 0 20px #FFD700, 0 0 40px red; animation: popIn 1s ease-out infinite alternate; margin: 0; }
+@keyframes popIn { 0% { transform: scale(1); } 100% { transform: scale(1.1); text-shadow: 0 0 40px #FFD700, 0 0 80px orange; } }
+@media only screen and (max-width: 768px) { #grid { transform: scale(0.7); } }
