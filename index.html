@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Last Man Standing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="setup-screen">
+        <h2>Setup Game</h2>
+        
+        <div id="saved-game-section" class="hidden">
+            <button onclick="loadSavedGame()" class="resume-btn nav-item">Resume Saved Game</button>
+            <div id="saved-game-date"></div>
+            <div class="divider"><span>OR START NEW</span></div>
+        </div>
+
+        <div id="step-1">
+            <button onclick="showBotMenu()" class="nav-item" style="background: #007bff; border-color: #0056b3; width: 100%; padding: 12px; margin-bottom: 15px;">👤 Play vs Computer</button>
+            
+            <div class="divider"><span>MULTIPLAYER</span></div>
+            
+            <p>Number of Humans:</p>
+            <button onclick="setupPlayers(2)" class="nav-item">2 Players</button>
+            <button onclick="setupPlayers(3)" class="nav-item">3 Players</button>
+            <button onclick="setupPlayers(4)" class="nav-item">4 Players</button>
+        </div>
+
+        <div id="step-bot" class="hidden">
+            <p>Select Difficulty:</p>
+            <button onclick="setupBotGame(1)" class="nav-item">1 vs 1 Bot</button>
+            <button onclick="setupBotGame(2)" class="nav-item">1 vs 2 Bots</button>
+            <button onclick="setupBotGame(3)" class="nav-item">1 vs 3 Bots</button>
+            <br>
+            <button onclick="goBackToMain()" class="nav-item" style="background: #666; margin-top: 10px; font-size: 14px;">Back</button>
+        </div>
+
+        <div id="step-2" class="hidden">
+            <div id="player-config"></div>
+            
+            <div style="display: flex; gap: 10px; justify-content: center; margin: 10px 0;">
+                <button onclick="saveNames()" class="nav-item" style="background: #17a2b8; font-size: 14px; padding: 5px 10px;">Save Names</button>
+                <button onclick="loadNames()" class="nav-item" style="background: #17a2b8; font-size: 14px; padding: 5px 10px;">Load Names</button>
+            </div>
+
+            <p id="error-msg" style="color: red; font-weight: bold; min-height: 20px;"></p>
+            <button onclick="startToss()" class="nav-item" style="background: #28a745; border-color: #28a745; width: 100%; padding: 12px; font-size: 18px;">START GAME</button>
+            <button onclick="goBackToStep1()" class="nav-item" style="background: #666; margin-top: 5px; font-size: 12px;">BACK</button>
+        </div>
+    </div>
+
+    <div id="toss-overlay" class="hidden">
+        <h2 style="color: white; text-shadow: 0 2px 4px black;">Deciding First Turn...</h2>
+        <div id="wheel-container">
+            <div id="wheel-pointer">▼</div>
+            <div id="wheel"></div>
+        </div>
+        <h1 id="toss-result"></h1>
+    </div>
+
+    <div id="pause-menu" class="hidden">
+        <div class="pause-box">
+            <h2 style="margin-top:0;">Game Paused</h2>
+            <button class="pause-btn nav-item" onclick="togglePauseMenu()">▶ Resume</button>
+            <button class="pause-btn nav-item" onclick="saveGame()">💾 Save Game</button>
+            <button class="pause-btn nav-item" onclick="restartGame()">🔄 Restart Match</button>
+            <button class="pause-btn nav-item" onclick="goHome()" style="background: #dc3545; border-color:#a71d2a;">🏠 Exit to Home</button>
+        </div>
+    </div>
+
+    <div id="game-arena" class="hidden">
+        
+        <div id="top-bar">
+            <div class="left-controls">
+                <button class="top-btn nav-item" onclick="togglePauseMenu()" title="Menu">☰</button>
+            </div>
+            <div id="status-bar">Initialize...</div>
+        </div>
+        
+        <div id="grid"></div>
+
+        <div id="game-notification"></div>
+
+        <div id="dice-container"></div>
+    </div>
+
+    <div id="victory-screen" class="hidden">
+        <canvas id="fireworks"></canvas>
+        <div id="victory-content">
+            <h1 id="winner-name">PLAYER WINS!</h1>
+            <button onclick="restartGame()" class="nav-item" style="font-size: 20px; padding: 15px 30px; margin-top: 20px; cursor: pointer; background: white; color: black; border: none; border-radius: 5px;">PLAY AGAIN</button>
+            <br>
+            <button onclick="goHome()" class="nav-item" style="margin-top: 10px; background: #333; color: white; padding: 10px 20px; border: 1px solid white;">HOME</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
